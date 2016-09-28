@@ -5,19 +5,66 @@ var myChart = echarts.init(document.getElementById('main'));
 function PrefixInteger(num, n) {
     return (Array(n).join(0) + num).slice(-n);
 }
+//阻止冒泡函数
+function stopBubble(e){
+    if(e && e.stopPropagation){
+        e.stopPropagation();  //w3c
+    }else{
+    window.event.cancelBubble=true; //IE
+    }
+}
 //大数值加逗号
-function separator(value){
+/*function separator(value){
     if(value > 1000000){
-        return parseInt(value / 1000000) + ',' + parseInt(value / 1000) + ',' + PrefixInteger(value % 1000, 3);
+        return parseInt(value / 1000000) + ',' + PrefixInteger(parseInt((value % 1000000) / 1000), 3) + ',' + PrefixInteger(value % 1000, 3);
     }else if(value > 1000){
         return parseInt(value / 1000) + ',' + PrefixInteger(value % 1000, 3);
     }else{
         return value;
-    } 
+    }
+}
+function separator(n){
+    if (n > 1000){
+        var kilo = n % 1000;
+        return separator(parseInt(n / 1000)) + ',' + PrefixInteger(kilo % 1000, 3);
+    }
+    else{
+        return n;
+    }
+}*/
+function separator(value){
+    return parseFloat(value).toLocaleString();    
+}
+
+function showName(seriesName, value, html){
+    switch(seriesName){
+        case 'iOS充值金额':
+            html += '<div class="tooltip indent" style="color:#5484E1;">';
+            break;
+        case 'Android充值金额': 
+            html += '<div class="tooltip" style="color:#FEAE22;">';
+            break;
+        case 'iOS充值人数':
+            html += '<div class="tooltip indent" style="color:#008B40;">';
+            break;
+        case 'Android充值人数':
+            html += '<div class="tooltip" style="color:#FC4900;">';
+            break;
+        case 'iOS人均充值':
+            html += '<div class="tooltip indent" style="color:#83C86E;">';
+            break;
+        case 'Android人均充值':
+            html += '<div class="tooltip" style="color:#65AEED;">';
+            break;
+        default:
+            break; 
+    }
+    return html + seriesName + ':  ' + value + '</div>';
 }
 
 var dataTooltip = document.getElementById('data-tooltip');
 var dataBtn = document.getElementById('data-click-btn');
+
 dataBtn.onclick = function(){
     dataTooltip.style.display = 'block';
     dataTooltip.style.position = 'absolute';
@@ -26,8 +73,173 @@ dataBtn.onclick = function(){
     dataTooltip.style.left = left + 50 + 'px';
     dataTooltip.style.top = top + 25 + 'px';
     var list = document.getElementsByTagName('li');
+    stopBubble(event); 
+    document.onclick = function(){
+        dataTooltip.style.display = 'none';
+        document.onclick = null;　
+    }
+
+    list[2].onclick = function(){
+        var optionMonth = {
+            tooltip: {
+                formatter: function(params){
+                    var html = '';
+                    var a = [];
+                    var c = [];
+                    var index = params[0].dataIndex;
+//                    console.log(index);
+                    var title = params[0].name;
+                    for(var i = 0; i < params.length; i++){
+                        a[i] = params[i].seriesName;
+                        c[i] = params[i].value;
+                        c[i] = separator(c[i]);
+                        html = showName(a[i], c[i], html);
+                    }
+                    switch(index){
+                        case 0:
+                            title = title + '(8/19~8/31)';
+                            break;
+                        case 1:
+                            title = title + '(9/1~9/18)';
+                            break;
+                        default:
+                            break;
+                    }
+                    var html0 = '<div style="color:#666;text-align:center">' + title + '</div>';
+                    return html0 + html;
+                }
+            },
+            xAxis: {
+                axisLabel: {
+                    interval: 0
+                },                
+                data: ['2016年8月','2016年9月']
+            },
+            yAxis: [
+            {
+                min: 0,
+                max: 10000000,
+                interval: 2500000,
+                axisLabel: {
+                    formatter: function(value,index){
+                        if(!index){
+                            return value;
+                        }else{
+                            return value / 1000000 + 'M';
+                        }                    
+                    }
+                }
+            },
+            {
+                min: 0,
+                max: 2000,
+                interval: 500,
+            }],
+            series: [
+            {
+                label: {
+                    normal: {
+                        formatter: function(params){
+                            return separator(params.value);                                
+                        }
+                    }
+                },
+                data: [5143265, 7055125]
+            },
+            {
+                label: {
+                    normal: {
+                        formatter: function(params){
+                            return separator(params.value);                                
+                        }
+                    }
+                },   
+                data: [6600420, 9027610] 
+            },
+            {
+                label: {
+                    normal: {
+                        formatter: function(params){
+                            return separator(params.value);                                
+                        }
+                    }
+                },   
+                data: [47054, 67737] 
+            },
+            {
+                label: {
+                    normal: {
+                        formatter: function(params){
+                            return separator(params.value);                                
+                        }
+                    }
+                },   
+                data: [61709, 87131] 
+            },
+            {
+                label: {
+                    normal: {
+                        formatter: '',
+                    }
+                },   
+                data: [1423.07, 1888.71] 
+            },
+            {
+                label: {
+                    normal: {
+                        formatter: function(params){
+                            return separator(params.value);                                
+                        }
+                    }
+                },   
+                data: [1405.43, 1875.93] 
+            }]
+        };
+        myChart.setOption(optionMonth);
+        setTimeout(function(){
+            document.getElementById('data-info').innerHTML = '日期（按月）';
+            dataTooltip.style.display = 'none';
+        },100);
+    }
+
     list[3].onclick = function(){
-        var option = {
+        var optionWeek = {
+            tooltip: {
+                formatter: function(params){
+                    var html = '';
+                    var a = [];
+                    var c = [];
+                    var index = params[0].dataIndex;
+                    var title = params[0].name;
+                    for(var i = 0; i < params.length; i++){
+                        a[i] = params[i].seriesName;
+                        c[i] = params[i].value;
+                        c[i] = separator(c[i]);
+                        html = showName(a[i], c[i], html);
+                    }
+                    switch(index){
+                        case 0:
+                            title = title + '(8/19~9/21)';
+                            break;
+                        case 1:
+                            title = title + '(8/22~8/28)';
+                            break;
+                        case 2:
+                            title = title + '(8/29~9/4)';
+                            break;
+                        case 3:
+                            title = title + '(9/5~9/11)';
+                            break;
+                        case 4:
+                            title = title + '(9/12~9/18)';
+                            break;
+                        default:
+                            break;
+                    }
+                    var html0 = '<div style="color:#666;text-align:center">' + title + '</div>';
+                    return html0 + html;
+                }
+            },
             xAxis: {
                 axisLabel: {
                     interval: 0
@@ -56,28 +268,101 @@ dataBtn.onclick = function(){
             }],
             series: [
             {
+                label: {
+                    normal: {
+                        position: [-40, -30],
+                        formatter: function(params){
+                            return separator(params.value);                                
+                        }
+                    }
+                }, 
                 data: [1223495, 2649725, 2895110, 2681695, 2748365]
             },
             {
+                label: {
+                    normal: {
+                        formatter: function(params){
+                            return separator(params.value);                                
+                        }
+                    }
+                }, 
                 data: [1446690, 3646975, 3518665, 3526950, 3488750]
             },
             {
+                label: {
+                    normal: {
+                        formatter: function(params){
+                            if(params.dataIndex){
+                                return '';                                
+                            }else{
+                                return separator(params.value);
+                            }
+                        }
+                    }
+                }, 
                 data: [11127, 25239, 26015, 24361, 28049]
             },
             {
+                label: {
+                    normal: {
+                        formatter: function(params){
+                            if(params.dataIndex){
+                                return separator(params.value);                                
+                            }else{
+                                return '';
+                            }
+                        }
+                    }
+                }, 
                 data: [14857, 33513, 31224, 25118, 34128]
             },
             {
+                label: {
+                    normal: {
+                        formatter: function(params){
+                            if(!params.dataIndex){
+                                return '';
+                                                               
+                            }else if(!(params.dataIndex % 2)){
+                                return separator(params.value); 
+                            }else{
+                                return '';
+                            }
+                        }
+                    }
+                }, 
                 data: [329.32, 737.01, 781.19, 773.25, 691.01]
             },
             {
+                label: {
+                    normal: {
+                        formatter: function(params){
+                            if(!params.dataIndex){
+                                return '';
+                                                               
+                            }else if(!((params.dataIndex + 1) % 2)){
+                                return separator(params.value); 
+                            }else{
+                                return '';
+                            }
+                        }
+                    }
+                }, 
                 data: [292.62, 759.79, 793.3, 707.13, 718.52]
-            },
-            ]       
+            }]       
         };
-        myChart.setOption(option);
+        myChart.setOption(optionWeek);
         setTimeout(function(){
             document.getElementById('data-info').innerHTML = '日期（按周）';
+            dataTooltip.style.display = 'none';
+        },100);
+    }
+
+    list[4].onclick = function(){
+        var optionDay = option;
+        myChart.setOption(optionDay);
+        setTimeout(function(){
+            document.getElementById('data-info').innerHTML = '日期（按日）';
             dataTooltip.style.display = 'none';
         },100);
     }
@@ -94,9 +379,12 @@ var option = {
         borderWidth: 1,
         padding: [15, 20],
         axisPointer: {
-            type: 'line',
-            lineStyle: {
-                color: '#FFF'
+            type: 'shadow',
+            animation: false,
+            shadowStyle: {
+                color: '#000',
+                shadowBlur: {shadowBlur: 10},
+                opacity: 0
             }
         },
         position: function(p){
@@ -112,28 +400,7 @@ var option = {
                 a[i] = params[i].seriesName;
                 c[i] = params[i].value;
                 c[i] = separator(c[i]);
-                switch(a[i]){
-                    case 'iOS充值金额':
-                        html += '<div class="tooltip indent" style="color:#5484E1;">' + a[i] + ':  ' + c[i] + '</div>';
-                        break;
-                    case 'Android充值金额': 
-                        html += '<div class="tooltip" style="color:#FEAE22;">' + a[i] + ':  ' + c[i] + '</div>';
-                        break;
-                    case 'iOS充值人数':
-                        html += '<div class="tooltip indent" style="color:#008B40;">' + a[i] + ':  ' + c[i] + '</div>';
-                        break;
-                    case 'Android充值人数':
-                        html += '<div class="tooltip" style="color:#FC4900;">' + a[i] + ':  ' + c[i] + '</div>';
-                        break;
-                    case 'iOS人均充值':
-                        html += '<div class="tooltip indent" style="color:#83C86E;">' + a[i] + ':  ' + c[i] + '</div>';
-                        break;
-                    case 'Android人均充值':
-                        html += '<div class="tooltip" style="color:#65AEED;">' + a[i] + ':  ' + c[i] + '</div>';
-                        break;
-                    default:
-                        break; 
-                }
+                html = showName(a[i], c[i], html);
             }
             var html0 = '<div style="color:#666;text-align:center">' + b + '</div>';
             return html0 + html;
@@ -143,7 +410,8 @@ var option = {
             fontSize: 16,
             color: '#000',
             fontWeight: 'bold'
-        }
+        },
+        extraCssText: 'box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.5);'
     },
     legend: {
         orient: 'vertical',
@@ -186,8 +454,9 @@ var option = {
         }]
     },
     grid: {
-        left: '10%',
-        right: '24%'
+        left: '5%',
+        right: '24%',
+        containLabel: true
     },
     xAxis: {
         type: 'category',
@@ -295,10 +564,13 @@ var option = {
             label: {
                 normal: {
                     show: true,
-                    position: 'top',
+                    position: [-20, -30],
                     formatter: function(params){
-                        console.log(params.dataIndex);
-                        return separator(params.value);
+                        if(!(params.dataIndex % 3)){
+                            return separator(params.value);
+                        }else{
+                            return '';
+                        }                        
                     },
                     textStyle: {
                         color: '#666',
@@ -323,9 +595,13 @@ var option = {
             label: {
                 normal: {
                     show: true,
-                    position: 'top',
+                    position: [-20, -30],
                     formatter: function(params){
-                        return separator(params.value);
+                        if(!(params.dataIndex % 3 - 1)){
+                            return separator(params.value);
+                        }else{
+                            return '';
+                        }
                     },
                     textStyle: {
                         color: '#666',
@@ -352,7 +628,11 @@ var option = {
                     show: true,
                     position: 'top',
                     formatter: function(params){
-                        return separator(params.value);
+                        if(!(params.dataIndex % 4)){
+                            return separator(params.value);
+                        }else{
+                            return '';
+                        }
                     },
                     textStyle: {
                         color: '#666',
@@ -379,7 +659,11 @@ var option = {
                     show: true,
                     position: 'top',
                     formatter: function(params){
-                        return separator(params.value);
+                        if(!(params.dataIndex % 4 - 2)){
+                            return separator(params.value);
+                        }else{
+                            return '';
+                        }
                     },
                     textStyle: {
                         color: '#666',
@@ -402,15 +686,37 @@ var option = {
             name: 'iOS人均充值',
             type: 'line',
             yAxisIndex: 1,
-            symbol: 'none',
+            symbolSize: 6,
+            showSymbol: true,
             itemStyle: {
                 normal: {
-                    color: '#83C86E'
+                    color: '#83C86E',
+                    borderColor: '#83C86E',
+                    borderWidth: 4,
+                    shadowColor: '#acda9e',
+                    shadowOffsetX: 0,
+                    shadowOffsetY: 0,
+                    shadowBlur: 15
                 }
             },
             lineStyle: {
                 normal: {
-                    width: 3
+                    width: 3,
+                    color: '#83C86E'
+                }
+            },
+            label: {
+                normal: {
+                    show: true,
+                    position: 'bottom',
+                    formatter: function(params){
+                        return separator(params.value);
+                    },
+                    textStyle: {
+                        color: '#666',
+                        fontWeight: 'bolder',
+                        fontSize: 16
+                    }
                 }
             },
             data: [110.58, 113.55, 105.19, 102.19, 123.84, 91.43, 104.55, 101.54, 110.21, 103.25,
@@ -422,15 +728,36 @@ var option = {
             name: 'Android人均充值',
             type: 'line',
             yAxisIndex: 1,
-            symbol: 'none',
+            symbolSize: 5,
+            showSymbol: true,
             itemStyle: {
                 normal: {
-                    color: '#65AEED'
+                    color: '#65AEED',
+                    borderColor: '#65AEED',
+                    borderWidth: 4,
+                    shadowColor: '#98c9f3',
+                    shadowOffsetX: 0,
+                    shadowOffsetY: 0,
+                    shadowBlur: 15                    
                 }
             },
             lineStyle: {
                 normal: {
                     width: 4
+                }
+            },
+            label: {
+                normal: {
+                    show: true,
+                    position: 'right',
+                    formatter: function(params){
+                        return separator(params.value);
+                    },
+                    textStyle: {
+                        color: '#666',
+                        fontWeight: 'bolder',
+                        fontSize: 16
+                    }
                 }
             },
             data: [93.08, 102.26, 97.28, 127.85, 102.83, 108.95, 127.52, 89.68, 108.62, 104.34,
