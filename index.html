@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<header>
+    <meta charset="utf-8">
+    <!-- 引入 ECharts 文件 -->
+    <script src="src/js/echarts.min.js"></script>
+    <style type="text/css">
+    	.tooltip{
+    		display: block;
+    		white-space: pre;
+    		margin: 3px 10px 3px 0;
+    	}
+    	.indent{
+    		padding-left: 38px;
+    	}
+    	.data-container{
+    		position: absolute;
+    		height: 20px;
+    		left: 84%;
+    		top: 5%;
+    		cursor: pointer;
+    	}
+    	.data-container img{
+    		float: left;
+    		height: 20px;
+    		width: 20px;
+    		vertical-align: middle;
+    		margin-right: 20px;
+    	}
+    	.data-container .data-select{
+    		padding-right: 10px;
+    		display: relative;
+    		float: left;
+    		height: 20px;
+    		line-height: 20px;
+    		font-family: "微软雅黑";
+    		font-size: 16px;
+    		color: #666;
+    		border-bottom: 2px solid #98b5ec;
+    		padding-bottom: 2px;
+    	}
+    	.data-info,.triangle{
+    		float: left;
+    	}
+		.triangle{
+			margin: 0 8px;
+		  	position: relative;
+		}
+		.triangle:after, .triangle:before {
+		  	border: 6px solid transparent;
+		  	border-top: 6px solid #fff;
+		  	width: 0;
+		  	height: 0;
+		  	position: absolute;
+		  	top: 0;
+		  	top: 6px;
+		  	content: ' ';
+		}
+
+		.triangle:before {
+		  	border-top-color: #d1d4d6;
+		  	top: 9px;
+		}
+		.clear{
+			clear: both;
+		}
+		.data-tooltip{
+			display: none;
+			background-color: #fff;
+			width: 110px;
+			font-family: "微软雅黑";
+			font-size: 16px;
+			border: 1px solid #e8e9ed;
+			box-shadow: 5px 10px 15px #ccc;
+			border-radius: 3px;
+		}
+		.data-tooltip li{
+			padding: 5px 25px;
+			margin-left: -40px;
+			list-style-type: none;
+			color: #666;
+		}
+		.data-tooltip li:hover{
+			list-style-type: none;
+			color: #5484e1;
+			background-color: #f1f3f4;
+		}
+		.line-chart{
+			position: absolute;
+			left: 24px;
+			top: 200px;
+		}
+    </style>
+</header>
+<body>
+    <!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
+    <div id="main" style="width:100%;height:600px;"></div>
+    <img src="src/img/chart_line_16px.png" class="line-chart">
+    <div class="data-container" id="data-click-btn">
+    	<img src="src/img/date_16px.png">
+    	<div class="data-select" id="data-select">
+    		<span class="data-info" id="data-info">日期</span>
+    		<span class="triangle"></span>
+    		<div class="clear"></div>
+    		<div class="data-tooltip" id="data-tooltip">
+		    	<ul>
+		    		<li>按年</li>
+		    		<li>按季</li>
+		    		<li>按月</li>
+		    		<li>按周</li>
+		    		<li>按日</li>
+		    		<li>按时</li>
+		    		<li>按分</li>
+		    		<li>按秒</li>
+		    	</ul>
+    		</div>
+    	</div>
+    </div>
+    <script type="text/javascript" src="src/js/index.js"></script>
+</body>
+</html>
